@@ -35,16 +35,18 @@ def home_page():
 def about_page():
     return render_template('about.html', title='About')
 
+
 @app.route("/register/", methods=['GET', 'POST'])
 def register_page():
     form = RegistrationForm()
 
     if form.validate_on_submit():
         flash('Account created for %s with email %s'
-                    % (form.username.data, form.email.data), 'success')
+              % (form.username.data, form.email.data), 'success')
         return redirect(url_for('home_page'))
 
     return render_template('register.html', title="Register", form=form)
+
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login_page():
@@ -55,6 +57,7 @@ def login_page():
         return redirect(url_for('home_page'))
 
     return render_template('login.html', title="Login", form=form)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
