@@ -2,7 +2,7 @@ from flask import render_template, flash, url_for, redirect, request
 from flask_login import login_user, logout_user, current_user, login_required
 
 from flaskblog.app import app, bcrypt, db
-from flaskblog.forms import RegistrationForm, LoginForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flaskblog.models import User, Post
 
 posts = [
@@ -84,7 +84,30 @@ def logout_page():
     logout_user()
     return redirect(url_for('home_page'))
 
-@app.route("/account/")
+@app.route("/account/", methods=['GET', 'POST'])
 @login_required
 def account_page():
-    return render_template('account.html', title="Account")
+    form = UpdateAccountForm()
+
+    if form.validate_on_submit():
+        try:
+            form.validate_username_and_email()
+            if form.password.data != form.confirm_password.data:
+                raise Exception('password typed are different')
+
+            user = User.query.filter_by(username=current_user.username, email=current_user.email).first()
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            user.username = form.username.data
+            user.email = form.email.data
+            user.password = hashed_password
+
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+        except Exception as e:
+            flash(str(e), 'danger')
+            return redirect(url_for('account_page'))
+
+
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title="Account", form=form, image_file=image_file)  

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
+from flask_login import current_user
 
 from flaskblog.models import User
 from flaskblog.app import bcrypt
@@ -37,3 +38,24 @@ class LoginForm(FlaskForm):
         return user is not None and \
                bcrypt.check_password_hash(user.password, self.password.data)
 
+class UpdateAccountForm(FlaskForm):
+    username = StringField('username',
+                    validators=[DataRequired(), Length(8)])
+    email = StringField('email',
+                    validators=[DataRequired()])
+    password = PasswordField('password',
+                    validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField('password',
+                    validators=[DataRequired(), Length(min=8), EqualTo('password')])
+    submit = SubmitField('Update')
+
+    def validate_username_and_email(self):
+        if self.email != current_user.email:
+            user = User.query.filter_by(email=self.email.data).first()
+            if user is not None:
+                raise Exception('user with email %s already exist' % self.email)
+
+        if self.username != current_user.username:
+            user = User.query.filter_by(username=self.username.data).first()
+            if user is not None:
+                raise Exception('user with username %s already exist' % self.username)
