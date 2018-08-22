@@ -1,6 +1,12 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import (
+    StringField, 
+    PasswordField, 
+    SubmitField, 
+    BooleanField, 
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from flask_login import current_user
 
@@ -62,3 +68,8 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(username=self.username.data).first()
             if user is not None:
                 raise Exception('user with username %s already exist' % self.username.data)
+
+class PostForm(FlaskForm):
+    title = StringField('title', validators=[DataRequired()])
+    content = TextAreaField('content', validators=[DataRequired()])
+    submit = SubmitField('Create')

@@ -3,31 +3,55 @@ from flask_login import login_user, logout_user, current_user, login_required
 import os
 
 from flaskblog.app import app, bcrypt, db
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import (
+    RegistrationForm, 
+    LoginForm, 
+    UpdateAccountForm,
+    PostForm
+)
 from flaskblog.models import User, Post
 from flaskblog.task.user_account import save_picture
-
-posts = [
-    {
-        'author': 'Rizki Ihza Parama',
-        'title': 'Blog Post 1',
-        'content': 'First Blog Post',
-        'date': 'April 20, 2018'
-    },
-    {
-        'author': 'Nadia Dewi',
-        'title': 'Blog Post 2',
-        'content': 'Second Blog Post',
-        'date': 'April 21, 2018'
-    },
-]
 
 
 @app.route("/")
 @app.route("/home")
 def home_page():
+    posts = Post.query.all()
     return render_template('home.html', posts=posts, title='Home')
 
+@app.route("/post/create", methods=['GET', 'POST'])
+@login_required
+def create_post_page():
+    form = PostForm()
+
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data)
+        post.author_id = current_user.id
+        db.session.add(post)
+        db.session.commit()
+        flash("post successfully created", "success")
+        return redirect(url_for('home_page'))
+
+    return render_template('create_post.html', form=form, title='Create Post')
+
+@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
+def post_page(post_id):
+    post = Post.query.get(post_id)
+    form = PostForm()
+
+    if form.validate_on_submit():
+        post = Post.query.get(post_id)
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash("post have been edited successfully", "success")
+        return redirect(url_for('home_page'))
+
+    if request.method == 'GET':
+        form.content.data = post.content
+        form.title.data = post.title
+
+    return render_template('edit_post.html', post=post, form=form, title='Edit Post')
 
 @app.route("/about/")
 def about_page():

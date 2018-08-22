@@ -1,4 +1,6 @@
 .DS_STORE
+.vscode/*
 __pycache__/*
+flaskblog/__pycache__/*
 flaskblog/static/profile_pics/*
 !flaskblog/static/profile_pics/default.jpg
