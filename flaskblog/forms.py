@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from flask_login import current_user
@@ -45,17 +46,19 @@ class UpdateAccountForm(FlaskForm):
                     validators=[DataRequired()])
     password = PasswordField('password',
                     validators=[DataRequired(), Length(min=8)])
-    confirm_password = PasswordField('password',
+    confirm_password = PasswordField('confirm password',
                     validators=[DataRequired(), Length(min=8), EqualTo('password')])
+    image_file = FileField('profile picture', validators=[FileAllowed(['jpg', 'png'])])
+
     submit = SubmitField('Update')
 
     def validate_username_and_email(self):
-        if self.email != current_user.email:
+        if self.email.data != current_user.email:
             user = User.query.filter_by(email=self.email.data).first()
             if user is not None:
-                raise Exception('user with email %s already exist' % self.email)
+                raise Exception('user with email %s already exist' % self.email.data)
 
-        if self.username != current_user.username:
+        if self.username.data != current_user.username:
             user = User.query.filter_by(username=self.username.data).first()
             if user is not None:
-                raise Exception('user with username %s already exist' % self.username)
+                raise Exception('user with username %s already exist' % self.username.data)

@@ -10,8 +10,10 @@ flask-wtf = "*"
 flask-sqlalchemy = "*"
 flask-bcrypt = "*"
 flask-login = "*"
+pillow = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.6"

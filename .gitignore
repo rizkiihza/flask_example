@@ -1,2 +1,4 @@
 .DS_STORE
-__pycache__/
+__pycache__/*
+flaskblog/static/profile_pics/*
+!flaskblog/static/profile_pics/default.jpg
